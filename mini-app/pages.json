@@ -1,0 +1,137 @@
+{
+	"subPackages":[
+		{
+			"root":"subconstract/merchantHome/",
+			"pages":[
+				{
+					"path":"index",
+					"style":{
+						"navigationBarTitleText": "首页",
+						"enablePullDownRefresh": false
+					}
+				}
+			]
+		},
+		{
+			"root":"subconstract/actorHome/",
+			"pages":[
+				{
+					"path":"index",
+					"style":{
+						"navigationBarTitleText": "首页",
+						"enablePullDownRefresh": false
+					}
+				}
+			]
+		},
+		{
+			"root":"subconstract/userCenter/",
+			"pages":[
+				{
+					"path":"index",
+					"style":{
+						"navigationBarTitleText": "个人中心",
+						"enablePullDownRefresh": false
+					}
+				}
+			]
+		},
+		{
+			"root":"subconstract/myCooperation/",
+			"pages":[
+				{
+					"path":"index",
+					"style":{
+						"navigationBarTitleText": "我的合作",
+						"enablePullDownRefresh": false
+					}
+				}
+			]
+		},
+		{
+			"root":"subconstract/addPartner/",
+			"pages":[
+				{
+					"path":"index",
+					"style":{
+						"navigationBarTitleText": "填写合作信息",
+						"enablePullDownRefresh": false,
+						"navigationStyle":"custom"
+					}
+				}
+			]
+		}
+	],
+	"pages": [
+		{
+			"path": "pages/login/index",
+			"style": {
+				"navigationBarTitleText": "登录",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/identity/index",
+			"style": {
+				"navigationBarTitleText": "身份选择",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/userInfo/index",
+			"style": {
+				"navigationBarTitleText": "个人信息",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/phone/index",
+			"style": {
+				"navigationBarTitleText": "修改手机号",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/wechat/index",
+			"style": {
+				"navigationBarTitleText": "修改微信号",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/address/index",
+			"style": {
+				"navigationBarTitleText": "修改地址",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/addGoods/index",
+			"style": {
+				"navigationBarTitleText": "新增商品",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/addStore/index",
+			"style": {
+				"navigationBarTitleText": "添加店铺",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/myStore/index",
+			"style": {
+				"navigationBarTitleText": "我的店铺",
+				"enablePullDownRefresh": false
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "报表",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	},
+	"cloud": true
+}
