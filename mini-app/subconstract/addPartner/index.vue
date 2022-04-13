@@ -42,15 +42,6 @@
                 v-show='active === 5'
                 ref="otherForm"
             )
-            //- MyForm(
-            //-     v-if='active === 0'
-            //-     :data="firstArr"
-            //- )
-
-            //- MyForm.second-form(
-            //-     v-if='active === 1'
-            //-     :data="secondArr"
-            //- )
         
         button.first-btn(
             v-if='active == 0'
