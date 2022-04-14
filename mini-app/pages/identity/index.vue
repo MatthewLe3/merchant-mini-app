@@ -25,8 +25,15 @@
                         pic:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/image/%E8%BA%AB%E4%BB%BD%E9%80%89%E6%8B%A9-%E4%B8%BB%E6%92%AD.png?sign=5f00c088c3a4f7960b4b901430119a7a&t=1649487689',
                         des:'我要邀请商家申报商品信息'
                     }
-                ]
+                ],
+                goods_id:0
             }
+        },
+        mounted(){
+            let pages = getCurrentPages();
+            let curPage = pages[pages.length-1];
+            const {goods_id} = curPage.options
+			this.goods_id = goods_id
         },
         computed:{
             ...mapState(['nickName','avatarUrl'])
@@ -47,7 +54,7 @@
                 if(code == 200){
                     setTimeout(()=>{
                         uni.redirectTo({
-                            url: `${index + 1 === 1 ? '/subconstract/merchantHome/index' : '/pages/actorHome/index'}`
+                            url: `${index + 1 === 1 ? '/subconstract/merchantHome/index' : `/pages/actorHome/index?goods_id=${this.goods_id}`}`
                         })
                     },time)
                 }

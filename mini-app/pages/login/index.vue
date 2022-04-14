@@ -24,11 +24,15 @@
 		},
 		data() {
 			return {
-				icon:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/image/APP%E5%9B%BE%E6%A0%87png%EF%BC%88%E4%B8%B4%E6%97%B6%EF%BC%89.png?sign=487ba6bd8710faeaef208f2a81d0f487&t=1649528172'
+				icon:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/image/APP%E5%9B%BE%E6%A0%87png%EF%BC%88%E4%B8%B4%E6%97%B6%EF%BC%89.png?sign=487ba6bd8710faeaef208f2a81d0f487&t=1649528172',
+				goods_id:0
 			};
 		},
 		mounted(){
-			
+			let pages = getCurrentPages();
+            let curPage = pages[pages.length-1];
+            const {goods_id} = curPage.options
+			this.goods_id = goods_id
 		},
 		computed: {
 			...mapState(['nickName','avatarUrl'])   
@@ -47,11 +51,11 @@
 					this.setUserInfo(data)
 					const {identity_type} = data
 					uni.redirectTo({
-						url: `${identity_type === 1 ? '/subconstract/merchantHome/index' : '/subconstract/actorHome/index'}`
+						url: `${identity_type === 1 ? '/subconstract/merchantHome/index' : `/subconstract/actorHome/index?goods_id=${this.goods_id}`}`
 					})
 				}else{					
 					uni.redirectTo({
-						url: '/pages/identity/index'
+						url: `/pages/identity/index?goods_id=${this.goods_id}`
 					})
 				}
 			},

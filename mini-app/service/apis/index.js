@@ -54,6 +54,15 @@ export const addGoods = async (data) => {
 	return res
 }
 
+export const updateGoods = async (data) => {
+	let res = await service({
+		url:'/goods_manage/update_goods/',
+		data
+	})
+
+	return res
+}
+
 export const getGoodsInfo = async (data) => {
 	let res = await service({
 		url:'/goods_manage/get_goods_info/',

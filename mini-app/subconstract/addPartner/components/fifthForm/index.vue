@@ -16,6 +16,7 @@ scroll-view.my-form
             u--input(
                 v-model="commissionInfo.commission_rate" 
                 border="none"
+                type="number"
                 placeholder="0-100（%）"
             )
         u-form-item(
@@ -27,6 +28,7 @@ scroll-view.my-form
             u--input(
                 v-model="commissionInfo.pos_price" 
                 border="none"
+                type="number"
                 placeholder="填写坑位费"
             )
 </template>
@@ -48,11 +50,11 @@ export default {
             },
             rules:{
                 'commission_rate': {
-                    type: 'string',
+                    type: 'number',
                     required: false
                 },
                 'pos_price': {
-                    type: 'string',
+                    type: 'number',
                     required: false
                 }
             }
@@ -62,6 +64,7 @@ export default {
     watch:{
         info:{
             handler:function(newVal){
+                console.log('diwubu',newVal)
                 this.commissionInfo = Object.assign(this.commissionInfo,newVal)
             },
             immediate:true

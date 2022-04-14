@@ -36,7 +36,7 @@ scroll-view.my-form
             prop="live_price" 
             borderBottom 
             ref="item1"
-            type='number'
+            type='string'
         )
             u--input(
                 v-model="priceInfo.live_price" 
@@ -59,7 +59,7 @@ scroll-view.my-form
             prop="tmall_price" 
             borderBottom 
             ref="item1"
-            type='number'
+            type='string'
         )
             u--input(
                 v-model="priceInfo.tmall_price" 
@@ -71,7 +71,7 @@ scroll-view.my-form
             prop="taobao_price" 
             borderBottom 
             ref="item1"
-            type='number'
+            type='string'
         )
             u--input(
                 v-model="priceInfo.taobao_price" 
@@ -84,7 +84,7 @@ scroll-view.my-form
             prop="other_price" 
             borderBottom 
             ref="item1"
-            type='number'
+            type='string'
         )
             u--input(
                 v-model="priceInfo.other_price" 
@@ -115,15 +115,15 @@ export default {
             },
             rules:{
                 'daily_price': {
-                    type: 'number',
+                    type: 'string',
                     required: false
                 },
                 'lowest_price': {
-                    type: 'number',
+                    type: 'string',
                     required: false
                 },
                 'live_price': {
-                    type: 'number',
+                    type: 'string',
                     required: false
                 },
                 'preferential_way': {
@@ -131,15 +131,15 @@ export default {
                     required: false
                 },
                 'tmall_price': {
-                    type: 'number',
+                    type: 'string',
                     required: false
                 },
                 'taobao_price': {
-                    type: 'number',
+                    type: 'string',
                     required: false
                 },
                 'other_price': {
-                    type: 'number',
+                    type: 'string',
                     required: false
                 },
             }
@@ -150,6 +150,7 @@ export default {
         goodsInfo:{
             handler:function(newVal){
                 this.priceInfo = Object.assign(this.priceInfo,newVal)
+                
             },
             immediate:true
         }

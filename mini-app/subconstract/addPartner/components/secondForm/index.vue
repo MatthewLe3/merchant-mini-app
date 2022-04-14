@@ -281,28 +281,11 @@ export default {
             const {value} = e
             console.log('vvvvvvv',value)
             const {
-                goods_name= '',
-                brand='',
-                specification= '',
-                storage_condition= '',
-                shelf_life='',
-                unsuitable_people= '',
-                favorable_rate='',
-                goods_url='',
-                selling_point= '',
                 pic_path='',
                 live_recording_screen_path=''} = value[0]
 
-            this.goodsInfo = Object.assign(this.goodsInfo,{
-                goods_name,
-                brand,
-                specification,
-                storage_condition,
-                shelf_life,
-                unsuitable_people,
-                favorable_rate,
-                goods_url,
-                selling_point,
+            this.goodsInfo = Object.assign(this.goodsInfo,value[0],{
+            
                 pic_path:pic_path ? [{
                     status: 'success',
                     message: '',
@@ -315,7 +298,7 @@ export default {
                 }] : []
             })
 
-            this.$emit('updateGoodsInfo',value[0])
+            this.$emit('updateGoodsInfo',this.goodsInfo)
             this.showCol = false
         },
         deletePic(e){

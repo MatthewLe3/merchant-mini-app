@@ -6,7 +6,8 @@ const store = new Vuex.Store({
         nickName:'',
         avatarUrl:'',
         userInfo:{},
-        storeArr:[]
+        storeArr:[],
+        shareStatus:false
     },
     mutations: {
         setNickName(state,value){
@@ -20,6 +21,9 @@ const store = new Vuex.Store({
         },
         setStoreArr(state,value){
             state.storeArr = value
+        },
+        setShareStatus(state,value){
+            state.shareStatus = value
         }
     },
     actions: {}
