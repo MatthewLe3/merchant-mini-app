@@ -24,22 +24,28 @@
             )
             SecondForm(
                 v-show='active === 1'
+                :goodsList="goodsList"
+                @updateGoodsInfo="updateGoodsInfo"
                 ref="secondForm"
             )
             ThirdForm(
                 v-show='active === 2'
+                :goodsInfo="info"
                 ref="thirdForm"
             )
             FourthForm(
                 v-show='active === 3'
+                :info="info"
                 ref="fourthForm"
             )
             FifthForm(
                 v-show='active === 4'
+                :info="info"
                 ref="fifthForm"
             )
             OtherForm(
                 v-show='active === 5'
+                :info="info"
                 ref="otherForm"
             )
         
@@ -59,13 +65,13 @@
 
 <script>
 // import MyForm from '../../components/myForm/index.vue'
-import FirstForm from '@/components/firstForm/index.vue'
-import SecondForm from '@/components/secondForm/index.vue'
-import ThirdForm from '@/components/thirdForm/index.vue'
-import FourthForm from '@/components/fourthForm/index.vue'
-import FifthForm from '@/components/fifthForm/index.vue'
-import OtherForm from '@/components/otherForm/index.vue'
-
+import {getStoreGoodsInfo} from '../../service/apis/merchant'
+import FirstForm from './components/firstForm/index.vue'
+import SecondForm from './components/secondForm/index.vue'
+import ThirdForm from './components/thirdForm/index.vue'
+import FourthForm from './components/fourthForm/index.vue'
+import FifthForm from './components/fifthForm/index.vue'
+import OtherForm from './components/otherForm/index.vue'
 export default {
     props:{},
     components:{
@@ -88,7 +94,10 @@ export default {
                 {title:'佣金信息'},
                 {title:'其他'}
             ],
-            active:0
+            active:0,
+            goodsList:[],
+            info:{},
+            goodsInfo:{}
         };
     },
     computed:{
@@ -97,12 +106,12 @@ export default {
     created(){
         let _this = this
         uni.getSystemInfo({
-                success:function(e){
-                    let custom = uni.getMenuButtonBoundingClientRect();
-                    console.log('vvvvv',custom.bottom + custom.top - e.statusBarHeight + 4)
-                    _this.navHeight =  custom.bottom + custom.top - e.statusBarHeight + 4
-                }
-            })
+            success:function(e){
+                let custom = uni.getMenuButtonBoundingClientRect();
+                console.log('vvvvv',custom.bottom + custom.top - e.statusBarHeight + 4)
+                _this.navHeight =  custom.bottom + custom.top - e.statusBarHeight + 4
+            }
+        })
     },
     mounted(){
     },
@@ -113,17 +122,25 @@ export default {
         async nextStep(current){
             switch (current) {
                 case 0:
-                    console.log(this.$refs)
                     let shopInfo = await this.$refs.firstForm.submit()
-                    console.log('shopInfo',shopInfo)
                     if(shopInfo){
+                        this.info = Object.assign(this.info,shopInfo)
+                        const {store_id} = shopInfo
+                        let res = await getStoreGoodsInfo({
+                            store_id
+                        })
+                        this.goodsList = res.data || []
                         this.active = current +1
                     }
                     break;
                 case 1:
                     let goodsInfo = await this.$refs.secondForm.submit()
-                    console.log('goodsInfo',goodsInfo)
                     if(goodsInfo){
+                        console.log('goodsInfo',goodsInfo)
+                        this.info = Object.assign(this.info,goodsInfo,{
+                            pic_path:goodsInfo.pic_path.length ? goodsInfo.pic_path[0].url : '',
+                            live_recording_screen_path:goodsInfo.live_recording_screen_path.length ? goodsInfo.live_recording_screen_path[0].url : '',
+                        })
                         this.active = current +1
                     }
                     break;
@@ -131,6 +148,7 @@ export default {
                     let priceInfo = await this.$refs.thirdForm.submit()
                     console.log('priceInfo',priceInfo)
                     if(priceInfo){
+                        this.info = Object.assign(this.info,this.priceInfo)
                         this.active = current +1
                     }
                     break;
@@ -138,6 +156,7 @@ export default {
                     let expressInfo = await this.$refs.fourthForm.submit()
                     console.log('expressInfo',expressInfo)
                     if(expressInfo){
+                        this.info = Object.assign(this.info,this.expressInfo)
                         this.active = current +1
                     }
                     break;
@@ -145,6 +164,7 @@ export default {
                     let commissionInfo = await this.$refs.fifthForm.submit()
                     console.log('commissionInfo',commissionInfo)
                     if(commissionInfo){
+                        this.info = Object.assign(this.info,this.commissionInfo)
                         this.active = current +1
                     }
                     break;
@@ -152,13 +172,20 @@ export default {
                     let otherInfo = await this.$refs.otherForm.submit()
                     console.log('otherInfo',otherInfo)
                     if(otherInfo){
+                        this.info = Object.assign(this.info,this.otherInfo)
                         // this.active = current +1
                     }
+
+
+                    console.log('vvvvvvvvvvvvvvv',this.info)
                     break;
             
                 default:
                     break;
             }
+        },
+        updateGoodsInfo(value){
+            this.goodsInfo = value
         }
     }
 };

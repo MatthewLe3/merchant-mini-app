@@ -1,4 +1,5 @@
 <template lang='pug'>
+.content
 	.tabbar
 		.tab(@click="jumpHome")
 			.tab-content
@@ -22,6 +23,22 @@
 						:src="selectedPage ? userIcon : selectedUserIcon"
 					)
 				.text 我的
+	u-modal(
+		:show="show" 
+		content='暂无店铺信息，是否新建店铺?'
+		:showConfirmButton="true"
+		:showCancelButton="true"
+		@confirm="handleConfirm"
+		@cancel="show=false"
+	)
+	//- u-modal(
+	//- 	:show="goodsModal" 
+	//- 	content='暂无店铺信息，是否新建店铺?'
+	//- 	:showConfirmButton="true"
+	//- 	:showCancelButton="true"
+	//- 	@confirm="handleConfirm"
+	//- 	@cancle="goodsModal=false"
+	//- )
 </template>
 
 <script>
@@ -39,7 +56,9 @@
 				userIcon:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9%20(1).png?sign=6410d886ae141c2c3dc234633d8bb4d9&t=1649689392',
 				selectedUserIcon:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E9%80%89%E4%B8%AD%20(1).png?sign=80624b2617358c482807c413e00c40da&t=1649689405',
 				
-				currentRoute:''
+				currentRoute:'',
+				show:false,
+				goodsModal:false
 			}
 		},
 		computed:{
@@ -75,20 +94,19 @@
 				if(this.userInfo.identity_type === 1){
 					// 新增商品
 					let res = await getStoreInfo({})
+					console.log('getStoreInfo',res)
 					const {code,data} = res
+
 					if(code === 200){
 						if(data.length){
 							this.setStoreArr(data)
+
 							uni.navigateTo({
-								url: '/pages/addGoods/index'
+								url: '/subconstract/addPartner/index'
 							})
 						}else{
-							uni.navigateTo({
-								url: '/pages/addStore/index'
-							})
+							this.show = true
 						}
-						
-						
 					}else{
 						uni.showToast({
 							title: '获取商铺信息失败',
@@ -97,6 +115,11 @@
 						});
 					}
 				}
+			},
+			handleConfirm(){
+				uni.navigateTo({
+					url: '/subconstract/addPartner/index'
+				})
 			}
 		}
 	}

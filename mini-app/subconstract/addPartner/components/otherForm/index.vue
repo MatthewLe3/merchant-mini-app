@@ -2,51 +2,40 @@
 scroll-view.my-form
     u--form(
         labelPosition="left" 
-        :model="commissionInfo" 
+        :model="otherInfo" 
         ref="form"
         :rules="rules"
         labelWidth="73"
     )
         u-form-item(
-            label="佣金比例" 
-            prop="commission_rate" 
+            label="备注信息" 
+            prop="comment" 
             borderBottom 
             ref="item1"
         )
-            u--input(
-                v-model="commissionInfo.commission_rate" 
+            u--textarea(
+                v-model="otherInfo.comment" 
                 border="none"
-                placeholder="0-100（%）"
-            )
-        u-form-item(
-            label="坑位费" 
-            prop="pos_price" 
-            borderBottom 
-            ref="item1"
-        )
-            u--input(
-                v-model="commissionInfo.pos_price" 
-                border="none"
-                placeholder="填写坑位费"
+                placeholder="其他备注信息"
             )
 </template>
 
 <script>
 export default {
-    props:{},
+    props:{
+        info:{
+            type:Object,
+            default:()=>{}
+        }
+    },
     components:{},
     data() {
         return {
-            commissionInfo: {
-                commission_rate: '',
-                pos_price: ''
+            otherInfo: {
+                comment: ''
             },
             rules:{
-                'commission_rate': {
-                    type: 'string',
-                    required: false
-                },
-                'pos_price': {
+                'comment': {
                     type: 'string',
                     required: false
                 }
@@ -54,7 +43,14 @@ export default {
         };
     },
     computed:{},
-    watch:{},
+    watch:{
+        info:{
+            handler:function(newVal){
+                this.otherInfo = Object.assign(this.otherInfo,newVal)
+            },
+            immediate:true
+        }
+    },
     created(){},
     mounted(){},
     methods:{
@@ -63,7 +59,7 @@ export default {
             try {
                 let res  = await this.$refs.form.validate()
                 if(res){
-                    return _this.commissionInfo
+                    return _this.otherInfo
                 }
                 return
             } catch (error) {

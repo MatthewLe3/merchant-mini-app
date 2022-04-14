@@ -66,7 +66,12 @@ scroll-view.my-form
 
 <script>
 export default {
-    props:{},
+    props:{
+        info:{
+            type:Object,
+            default:()=>{}
+        }
+    },
     components:{},
     data() {
         return {
@@ -102,7 +107,14 @@ export default {
         };
     },
     computed:{},
-    watch:{},
+    watch:{
+        info:{
+            handler:function(newVal){
+                this.expressInfo = Object.assign(this.expressInfo,newVal)
+            },
+            immediate:true
+        }
+    },
     created(){},
     mounted(){},
     methods:{

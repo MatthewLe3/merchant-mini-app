@@ -67,6 +67,7 @@ scroll-view.my-form
             u--input(
                 v-model="goodsInfo.shelf_life" 
                 border="none"
+                type="number"
                 placeholder="填写保质期（天）"
             )
         u-form-item(
@@ -84,6 +85,7 @@ scroll-view.my-form
             label="好评率" 
             prop="favorable_rate" 
             borderBottom 
+            type="number"
             ref="item1"
         )
             u--input(
@@ -145,7 +147,7 @@ scroll-view.my-form
     u-picker(
         :show="showCol" 
         :columns="columns"
-        keyName="name"
+        keyName="goods_name"
         @close="handleClose"
         @confirm="handleConfirm"
         @cancel="handleClose"
@@ -153,8 +155,14 @@ scroll-view.my-form
 </template>
 
 <script>
+
 export default {
-    props:{},
+    props:{
+        goodsList:{
+            type:Array,
+            default:()=>[]
+        }
+    },
     components:{},
     data() {
         return {
@@ -172,22 +180,6 @@ export default {
                 live_recording_screen_path: [],
             },
             showCol: false,
-            columns: [
-                [
-                    {
-                        name:'a',
-                        id:1
-                    },
-                    {
-                        name:'b',
-                        id:2
-                    },
-                    {
-                        name:'c',
-                        id:3
-                    },
-                ]
-            ],
             rules: {
                 'goods_name': {
                     type: 'string',
@@ -214,7 +206,7 @@ export default {
                     trigger: ['blur', 'change']
                 },
                 'shelf_life': {
-                    type: 'string',
+                    type: 'number',
                     required: true,
                     message: '请填写保质期',
                     trigger: ['blur', 'change']
@@ -226,7 +218,7 @@ export default {
                     trigger: ['blur', 'change']
                 },
                 'favorable_rate': {
-                    type: 'string',
+                    type: 'number',
                     required: true,
                     message: '请填写好评率',
                     trigger: ['blur', 'change']
@@ -252,8 +244,18 @@ export default {
             },
         };
     },
-    computed:{},
-    watch:{},
+    computed:{
+        columns:function(){
+            return [this.goodsList]
+        }
+    },
+    watch:{
+        goodsList:{
+            handler:function(newV){
+                console.log('newww',newV)
+            }
+        }
+    },
     created(){},
     mounted(){},
     methods:{
@@ -277,7 +279,43 @@ export default {
         },
         handleConfirm(e){
             const {value} = e
-            this.goodsInfo.store_name = value[0].name
+            console.log('vvvvvvv',value)
+            const {
+                goods_name= '',
+                brand='',
+                specification= '',
+                storage_condition= '',
+                shelf_life='',
+                unsuitable_people= '',
+                favorable_rate='',
+                goods_url='',
+                selling_point= '',
+                pic_path='',
+                live_recording_screen_path=''} = value[0]
+
+            this.goodsInfo = Object.assign(this.goodsInfo,{
+                goods_name,
+                brand,
+                specification,
+                storage_condition,
+                shelf_life,
+                unsuitable_people,
+                favorable_rate,
+                goods_url,
+                selling_point,
+                pic_path:pic_path ? [{
+                    status: 'success',
+                    message: '',
+                    url: pic_path
+                }] : [],
+                live_recording_screen_path:live_recording_screen_path ? [{
+                    status: 'success',
+                    message: '',
+                    url: live_recording_screen_path
+                }] : []
+            })
+
+            this.$emit('updateGoodsInfo',value[0])
             this.showCol = false
         },
         deletePic(e){

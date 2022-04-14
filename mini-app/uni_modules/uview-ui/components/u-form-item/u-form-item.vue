@@ -50,6 +50,7 @@
 					</view>
 					<view
 						class="item__body__right__content__icon"
+						style="width: 100rpx;align-items: center;text-align: center;"
 						v-if="$slots.right"
 					>
 						<slot name="right" />

@@ -3,7 +3,14 @@
 	<view class="content">
 		<!-- 这里设置了z-paging加载时禁止自动调用reload方法，自行控制何时reload（懒加载）-->
 		<!--  :enable-back-to-top="currentIndex===tabIndex" 在微信小程序上可以多加这一句，因为默认是允许点击返回顶部的，但是这个页面有多个scroll-view，会全部返回顶部，所以需要控制是当前index才允许点击返回顶部 -->
-		<z-paging ref="paging" v-model="dataList" @query="queryList" :fixed="false" :auto="false">
+		<z-paging 
+			ref="paging" 
+			v-model="dataList" 
+			@query="queryList" 
+			:fixed="false" 
+			:auto="false" 
+			:empty-view-text="currentIndex == 0 ? '还没有主播向你申领样品' : '暂无试样结果'"
+		>
 			<!-- 如果希望其他view跟着页面滚动，可以放在z-paging标签内 -->
             <template v-if="currentIndex == 0">
                 <view class="item" v-for="(item,index) in dataList" :key="index" @click="itemClick(item)">
@@ -51,6 +58,7 @@
 
 <script>
 import {getGoodsInfo} from '../../service/apis/index'
+import {getData,test2} from '../../service/apis/merchant'
 import uniCard from '../../uni_modules/uni-card/components/uni-card/uni-card.vue'
 	export default {
 		components:{
@@ -104,6 +112,7 @@ import uniCard from '../../uni_modules/uni-card/components/uni-card/uni-card.vue
         },
 		methods: {
 			async queryList(pageNo, pageSize) {
+				console.log('vvvvvvvvvvv',pageNo,pageSize)
 				//组件加载时会自动触发此方法，因此默认页面加载时会自动触发，无需手动调用
 				//这里的pageNo和pageSize会自动计算好，直接传给服务器即可
 				//模拟请求服务器获取分页数据，请替换成自己的网络请求
@@ -112,104 +121,41 @@ import uniCard from '../../uni_modules/uni-card/components/uni-card/uni-card.vue
 					pageSize: pageSize,
 					type: this.tabIndex + 1
 				}
-				const data= [
-						{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},
-						{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},
-						{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},
-						{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},
-						{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						}
-					]
+				// 等你发样品数据
+				// [
+				// 	{
+				// 		title:'title',
+				// 		detail:'detail',
+				// 		img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
+				// 	},
+				// ]
 
-                const resultData = [
-                    {
-                        no:1231131,
-                        status:0
-                    },
-                    {
-                        no:1231131,
-                        status:1
-                    },
-                    {
-                        no:1231131,
-                        status:1
-                    },
-                    {
-                        no:1231131,
-                        status:1
-                    },
-                    {
-                        no:1231131,
-                        status:1
-                    },
-                    {
-                        no:1231131,
-                        status:1
-                    },
-                    {
-                        no:1231131,
-                        status:1
-                    },
-                    {
-                        no:1231131,
-                        status:1
-                    },
-                    {
-                        no:1231131,
-                        status:1
-                    },
-                    {
-                        no:1231131,
-                        status:1
-                    }
-                ]
-				let res= await getGoodsInfo()
-				
+                // 试样结果data
+				// [
+				// 	{
+                //         no:1231131,
+                //         status:1
+                //     }
+				// ]
+
 
                 if(this.currentIndex == 0){
-                    this.$refs.paging.complete(data);
+					let res = await getData({
+						status:2,
+						pageNo,
+						pageSize,
+					})
+					console.log('111',res)
+                    this.$refs.paging.complete(res.data || []);
                     this.firstLoaded = true;
                 }else{
-                    this.$refs.paging.complete(resultData);
+					let res = await getData({
+						status:4,
+						pageNo,
+						pageSize,
+					})
+					console.log('222',res)
+                    this.$refs.paging.complete(res.data);
                     this.resultFirstLoaded = true;
                 }
 				

@@ -12,6 +12,7 @@ scroll-view.my-form
             prop="daily_price" 
             borderBottom 
             ref="item1"
+            type='number'
         )
             u--input(
                 v-model="priceInfo.daily_price" 
@@ -23,6 +24,7 @@ scroll-view.my-form
             prop="lowest_price" 
             borderBottom 
             ref="item1"
+            type='number'
         )
             u--input(
                 v-model="priceInfo.lowest_price" 
@@ -34,6 +36,7 @@ scroll-view.my-form
             prop="live_price" 
             borderBottom 
             ref="item1"
+            type='number'
         )
             u--input(
                 v-model="priceInfo.live_price" 
@@ -56,6 +59,7 @@ scroll-view.my-form
             prop="tmall_price" 
             borderBottom 
             ref="item1"
+            type='number'
         )
             u--input(
                 v-model="priceInfo.tmall_price" 
@@ -67,6 +71,7 @@ scroll-view.my-form
             prop="taobao_price" 
             borderBottom 
             ref="item1"
+            type='number'
         )
             u--input(
                 v-model="priceInfo.taobao_price" 
@@ -79,6 +84,7 @@ scroll-view.my-form
             prop="other_price" 
             borderBottom 
             ref="item1"
+            type='number'
         )
             u--input(
                 v-model="priceInfo.other_price" 
@@ -89,7 +95,12 @@ scroll-view.my-form
 
 <script>
 export default {
-    props:{},
+    props:{
+        goodsInfo:{
+            type:Object,
+            default:()=>{}
+        }
+    },
     components:{},
     data() {
         return {
@@ -104,15 +115,15 @@ export default {
             },
             rules:{
                 'daily_price': {
-                    type: 'string',
+                    type: 'number',
                     required: false
                 },
                 'lowest_price': {
-                    type: 'string',
+                    type: 'number',
                     required: false
                 },
                 'live_price': {
-                    type: 'string',
+                    type: 'number',
                     required: false
                 },
                 'preferential_way': {
@@ -120,22 +131,30 @@ export default {
                     required: false
                 },
                 'tmall_price': {
-                    type: 'string',
+                    type: 'number',
                     required: false
                 },
                 'taobao_price': {
-                    type: 'string',
+                    type: 'number',
                     required: false
                 },
                 'other_price': {
-                    type: 'string',
+                    type: 'number',
                     required: false
                 },
             }
         };
     },
     computed:{},
-    watch:{},
+    watch:{
+        goodsInfo:{
+            handler:function(newVal){
+                this.priceInfo = Object.assign(this.priceInfo,newVal)
+            },
+            immediate:true
+        }
+        
+    },
     created(){},
     mounted(){},
     methods:{
