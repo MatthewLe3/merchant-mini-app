@@ -60,8 +60,8 @@ scroll-view.my-form
 </template>
 
 <script>
-import {mapState} from 'vuex'
-import {newStore} from '../../../../service/apis/index'
+import {mapState,mapMutations} from 'vuex'
+import {newStore,getStoreInfo} from '../../../../service/apis/index'
 export default {
     props:{},
     components:{},
@@ -109,8 +109,18 @@ export default {
         }
     },
     created(){},
-    mounted(){},
+    async mounted(){
+        let res = await getStoreInfo({})
+        console.log('getStoreInfo',res)
+        const {code,data} = res
+        if(code === 200){
+            this.setStoreArr(data || [])
+        }
+    },
     methods:{
+        ...mapMutations({
+            setStoreArr:'setStoreArr'
+        }),
         async submit(){
             // 判断店铺是否为新增，新增调用新增接口
             let _this = this

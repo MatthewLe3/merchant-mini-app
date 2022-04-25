@@ -21,7 +21,9 @@
 					</view>
 				</view>
 				<view class="uni-card__header-extra" @click="onClick('extra')">
-					<text class="uni-card__header-extra-text">{{ extra }}</text>
+					<text v-if="extraType == 0" class="uni-card__header-extra-text">{{ extra }}</text>
+					<text v-if="extraType == 1" class="uni-card__header-extra-text pass">{{ extra }}</text>
+					<text v-if="extraType == 2" class="uni-card__header-extra-text fail">{{ extra }}</text>
 				</view>
 			</view>
 		</slot>
@@ -107,6 +109,10 @@
 			border: {
 				type: Boolean,
 				default: true
+			},
+			extraType:{
+				type:Number,
+				default:0
 			}
 		},
 		methods: {
@@ -217,6 +223,12 @@
 				.uni-card__header-extra-text {
 					font-size: 12px;
 					color: $uni-cart-subtitle-color;
+				}
+				.fail{
+					color: #fa3534;
+				}
+				.pass{
+					color: #19be6b;
 				}
 			}
 		}

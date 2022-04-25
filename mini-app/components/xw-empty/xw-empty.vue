@@ -47,7 +47,10 @@ export default {
 	align-items: center;
 	color: #555555;
 	font-size: 24rpx;
-	
+	text{
+		width: 500rpx;
+		text-align: center;
+	}
 }
 .empty_image {
 		width: 200rpx !important;

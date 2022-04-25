@@ -13,32 +13,54 @@
 </template>
 
 <script>
+import {mapState} from 'vuex'
 export default {
     props:{},
     components:{},
     data() {
         return {
-            tabData:[
-                {
-                    label:'手机号',
-                    pageName:'phone'
-                },
-                {
-                    label:'收货地址',
-                    pageName:'address'
-                },
-                {
-                    label:'微信号',
-                    pageName:'wechat'
-                },
-                {
-                    label:'我的店铺',
-                    pageName:'myStore'
-                }
-            ]
         };
     },
     computed:{
+        ...mapState(['userInfo']),
+        tabData:function(){
+            console.log('this.userInfo.identity_type',this.userInfo.identity_type)
+            if(this.userInfo.identity_type === 2){
+                return [
+                    {
+                        label:'手机号',
+                        pageName:'phone'
+                    },
+                    {
+                        label:'收货地址',
+                        pageName:'address'
+                    },
+                    {
+                        label:'微信号',
+                        pageName:'wechat'
+                    },
+                    {
+                        label:'我的店铺',
+                        pageName:'myStore'
+                    }
+                ]
+            }else{
+                return [
+                    {
+                        label:'手机号',
+                        pageName:'phone'
+                    },
+                    {
+                        label:'收货地址',
+                        pageName:'address'
+                    },
+                    {
+                        label:'微信号',
+                        pageName:'wechat'
+                    }
+                ]
+            }
+        }
     },
     watch:{},
     created(){},

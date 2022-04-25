@@ -292,15 +292,15 @@
 					console.log('表单错误信息：', err);
 				})
 			},
-			onShareAppMessage(res) {
-			    if (res.from === 'button') {// 来自页面内分享按钮
-					console.log(res.target)
-			    }
-			    return {
-					title: '自定义分享标题',
-					path: '/pages/form/index'
-			    }
-			  },
+			// onShareAppMessage(res) {
+			//     if (res.from === 'button') {// 来自页面内分享按钮
+			// 		console.log(res.target)
+			//     }
+			//     return {
+			// 		title: '自定义分享标题',
+			// 		path: '/pages/form/index'
+			//     }
+			//   },
 			change(e){
 				console.log('ee',e)
 				// let store = this.formArray[0].range[Number(e.detail.value)]

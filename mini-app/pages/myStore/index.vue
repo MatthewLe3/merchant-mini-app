@@ -1,5 +1,5 @@
 <template lang="pug">
-.my-store
+scroll-view(:scroll-y='true').my-store
     .empty(v-if='!shopList.length')
         XwEmpty(
             :isShow="true" 
@@ -91,7 +91,9 @@ export default {
 </script>
 <style lang="scss" scoped>
 .my-store{
-    height: 100%;
+    height:100%;
+    padding: 30rpx 0;
+    box-sizing: border-box;
     .store-list{
         uni-card{
             .operator{

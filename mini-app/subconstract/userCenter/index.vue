@@ -10,43 +10,43 @@
                 .name {{nickName}}
                 .arrow
                     image(:src='arrowIcon')
+            //- uni-card(
+            //-     title='我的合作'
+            //-     @click.stop="jumpCooperation(0)"
+            //- )
+            //-     .card-content(:class='[userInfo.identity_type === 1 ? "" : "two"]')
+            //-         .arrow
+            //-             image(:src='arrowIcon')
+            //-         .info(
+            //-             v-for='(item,index) in cooperationData'
+            //-             :key='index'
+            //-             @click.stop="jumpCooperation(index+1)"
+            //-         )
+            //-             .item
+            //-                 uni-badge(
+            //-                     v-if="item.num"
+            //-                     size="small" 
+            //-                     :text="item.num" 
+            //-                     absolute="rightTop" 
+            //-                     type="primary"
+            //-                 )
+            //-                     image(:src='item.icon')
+            //-                 image(
+            //-                     v-else
+            //-                     :src='item.icon'
+            //-                 )
+            //-                 .text {{item.label}}
             uni-card(
-                title='我的合作'
-                @click.stop="jumpCooperation(0)"
-            )
-                .card-content(:class='[userInfo.identity_type === 1 ? "" : "two"]')
-                    .arrow
-                        image(:src='arrowIcon')
-                    .info(
-                        v-for='(item,index) in cooperationData'
-                        :key='index'
-                        @click.stop="jumpCooperation(index+1)"
-                    )
-                        .item
-                            uni-badge(
-                                v-if="item.num"
-                                size="small" 
-                                :text="item.num" 
-                                absolute="rightTop" 
-                                type="primary"
-                            )
-                                image(:src='item.icon')
-                            image(
-                                v-else
-                                :src='item.icon'
-                            )
-                            .text {{item.label}}
-            uni-card(
-                :title='`我的商品(${goodsCount})`'
+                :title='`${userInfo.identity_type == 1 ? `我的选品(${goodsCount}` : `我的商品(${goodsCount}`})`'
             )
                 .card-content
                     .arrow
                         image(:src='arrowIcon')
-                    .images(
-                        v-for='(item,index) in goodsData'
-                        v-if="index<5"
-                    )
-                        image(:src='item.goods_url')
+                    GoodsCard( v-if='goodsData.length' :goodsData="goodsData" style='width:100%')
+                    //- .images(
+                    //-     v-for='(item,index) in goodsData'
+                    //- )
+                    //-     video(:src='item.live_recording_screen_path')
                     .block(v-if='!goodsData.length')
                         XwEmpty(
                             :isShow="true" 
@@ -59,6 +59,8 @@
 
 <script>
 import {mapState} from 'vuex'
+import GoodsCard from '../../components/goodsCard/index.vue'
+import {getData} from '../../service/apis/merchant'
 import tabbar from '../../components/tabbar/index.vue'
 import {getGoodsInfo} from '../../service/apis/index'
 import XwEmpty from '../../components/xw-empty/xw-empty.vue' 
@@ -67,7 +69,8 @@ export default {
     props:{},
     components:{
         tabbar,
-        XwEmpty
+        XwEmpty,
+        GoodsCard
     },
     data() {
         return {
@@ -81,7 +84,7 @@ export default {
             return this.goodsData.length || 0
         },
         cooperationData:function(){
-            return this.userInfo.identity_type === 1 ? [
+            return this.userInfo.identity_type === 2 ? [
                 {
                     label:'待发送',
                     icon:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/image/%E5%BE%85%E5%8F%91%E9%80%81.png?sign=7cf13f25dd019277d37b27f06486afef&t=1649564756',
@@ -121,9 +124,22 @@ export default {
             })
         },
         async handleGoods(){
-            let res = await getGoodsInfo({})
-            console.log('ress',res,res.data.length)
-            this.goodsData = res.data || []
+            console.log('this.userInfo.identity_type',this.userInfo.identity_type)
+            if(this.userInfo.identity_type === 1){
+                let res = await getData({
+                    status:4,
+                    test_result:1,
+                    page_number:1,
+                    count:10000
+                })
+                console.log('getData',res,res.data)
+                this.goodsData = res.data || []
+            }else{
+                let res = await getGoodsInfo({})
+                console.log('getGoodsInfo',res,res.data.length)
+                this.goodsData = res.data || []
+            }
+            
 
         },
         jumpCooperation(index){
@@ -142,6 +158,8 @@ export default {
     flex-direction: column;
     .content{
         flex: 1;
+        display: flex;
+        flex-direction: column;
         .user{
             display: flex;
             padding: 0 56rpx 0 36rpx;
@@ -175,6 +193,7 @@ export default {
             
         }
         uni-card{
+            flex: 1;
             position: relative;
             .card-content{
                 display: flex;

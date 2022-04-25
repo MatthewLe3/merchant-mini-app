@@ -34,46 +34,115 @@
 				@animationfinish="animationfinish"
 			)
 				block.swiper-item(
+					v-if="videoData.length"
 					v-for="(item, index) in videoData" 
 					:key="index"
 				)
 					swiper-item.swiper-item
-						video(
-							@click="setStatus(index)"
-							ref='video'
-							:id="`videoWrap${index}`"
-							:src="item.url" 
-							:initial-time='0'
-							:autoplay="false"
-							:controls="isControl"
-							custom-cache="false" 
-							loop="true" 
-							object-fit="cover"
-							:enable-play-gesture="true" 
-							:enable-progress-gesture="true"
-							:show-center-play-btn="false"
-						)
+						.my-video
+							video(
+								@click="setStatus(index)"
+								ref='video'
+								:id="`videoWrap${index}`"
+								:src="item.live_recording_screen_path" 
+								:initial-time='0'
+								:autoplay="false"
+								:controls="isControl"
+								custom-cache="false" 
+								loop="true" 
+								object-fit="cover"
+								:enable-play-gesture="true" 
+								:enable-progress-gesture="true"
+								:show-center-play-btn="false"
+							)
+							//- cover-view.my-view {{index}}
 						.right-bar
-						image.user(
-							:src="userIcon"
-							@click="handleClick('user')"
+						.user
+							image(
+								:src="userIcon"
+								@click="handleClick('user',item)"
+							)
+							.text 商家主页
+						.check
+							image(
+								:src="checkIcon"
+								@click="handleClick('check',item)"
+							)
+							.text 商品详情
+						.get
+							image(
+								:src="getIcon"
+								@click="handleClick('get',item)"
+							)
+							.text 样品申领
+				block.swiper-item(v-if='!videoData.length')
+					swiper-item
+						XwEmpty(
+							:isShow="true" 
+							text="啊欧，还没有商家向你申报供品信息喔，赶紧点击底部按钮邀请商家供品！" 
+							textColor="#777777"
 						)
-						image.check(
-							:src="checkIcon"
-							@click="handleClick('check')"
-						)
-						image.get(
-							:src="getIcon"
-							@click="handleClick('get')"
-						)
+		u-popup(
+			:show="showDetail"
+			@close="close" 
+			@open="open"
+			mode="bottom"
+			:round="10"
+			:closeable='true'
+			:closeOnClickOverlay="true"
+			:customStyle="{position:'fixed',width:'100%',height:'70%',bottom:0}"
+		)
+			Detail(
+				:info="info"
+			)
+
+		u-popup(
+			:show="merchantPop"
+			@close="merchantPop = false" 
+			@open="open"
+			mode="bottom"
+			:round="10"
+			:closeable='true'
+			:closeOnClickOverlay="true"
+			:customStyle="{position:'fixed',width:'100%',height:'70%',bottom:0}"
+		)
+			MerchantPop(
+				:info="info"
+			)
+
+		u-popup(
+			:show="showModal"
+			:round="10"
+			@close="closeGoods" 
+			@open="open"
+			mode="center"
+			:closeable='true'
+			:closeOnClickOverlay="true"
+			:customStyle="{width:'70%'}"
+		)
+			GetGoods(
+				@refresh="refresh"
+				:info="info"
+				:nickName="nickName"
+			)
 		tabbar
 </template>
 
 <script>
+	import XwEmpty from '../../components/xw-empty/xw-empty.vue'
+	import Detail from './components/detail.vue'
+	import GetGoods from './components/getGoods.vue'
+	import MerchantPop from './components/merchantInfo.vue'
 	import {tabbar} from '../../components/tabbar/index.vue'
+	import {getData,getCooperatioInfoById} from '../../service/apis/merchant'
+	import {mapState} from 'vuex'
 	export default {
 		components:{
-			tabbar
+			tabbar,
+			Detail,
+			GetGoods,
+			MerchantPop,
+			XwEmpty
 		},
 		data() {
 			return {
@@ -96,23 +165,52 @@
 				collectIcon:"https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%94%B6%E8%97%8F.png?sign=ca2388899205a170de43f81559cd4d03&t=1649685580",
 				collectedIcon:"https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%94%B6%E8%97%8F-%E6%94%B6%E8%97%8F.png?sign=cdf2cafd6bf6d425f68c7543461a1b09&t=1649685598",
 				checkIcon:"https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%9F%A5%E7%9C%8B.png?sign=6f1cf0648bfcfc8015bc63ffdf2fffba&t=1649685473",
-				getIcon:"https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E9%A2%86%E7%94%A8%E6%A0%B7%E5%93%81.png?sign=92d9f4b7fef4789fbf6c61d32bb537d9&t=1649689011"
+				getIcon:"https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E9%A2%86%E7%94%A8%E6%A0%B7%E5%93%81.png?sign=92d9f4b7fef4789fbf6c61d32bb537d9&t=1649689011",
+				cooperation_id:0,
+				showDetail:false,
+				info:{},
+				showModal:false,
+				merchantPop:false
 			};
 		},
+		computed:{
+			...mapState(['nickName'])
+		},
 		mounted(){
-			this.getData()
+			let pages = getCurrentPages();
+            let curPage = pages[pages.length-1];
+            const {cooperation_id} = curPage.options
+			this.cooperation_id = cooperation_id
+			this.getPageData()
 		},
 		methods: {
-			getData() {
-				this.videoData.push(...[
-					{
-						url:'http://imagetest.dejiplaza.com/mall/images/-20220411-00c9d380a2c549e581b7a009ee6645e5.mp4'					},
-					{
-						url:'http://imagetest.dejiplaza.com/mall/images/-20220411-f6edf2dbc1ef4c29a8821f3be4e75868.mp4',					},
-					{
-						url:'http://imagetest.dejiplaza.com/mall/images/-20220411-00c9d380a2c549e581b7a009ee6645e5.mp4',					},
-				])
+			refresh(){
+				this.getPageData()
+			},
+			async getPageData() {
 
+				let res = await getData({
+					status:1,
+					page_number:1,
+					count:1000
+				})
+				// console.log('vvvvaa',aa)
+				// let res = await getCooperatioInfoById({
+				// 	// status:1,
+				// 	// page_number:1,
+				// 	// count:10
+				// 	cooperation_id:this.cooperation_id
+				// })
+				// console.log('getCooperatioInfoById',res.data)
+
+				// res.data.map((val,index)=>{
+				// 	if(!val.cooperation_id){
+				// 		val.cooperation_id = this.cooperation_id
+				// 	}
+				// 	return
+				// })
+				this.videoData = res.data || []
+// console.log('this.videoData',this.videoData)
 				this.setPlayIndex()	
 			},
 			changed(e) {
@@ -120,18 +218,18 @@
 				this.changeIndex = current
 				this.currentVideo = current
 
-				if (this.videoData.length == current + 1) {
-					//当还有1个视频没有看的时候开始加载数据
-					if (this.hasMore) {
-						//后台还有更多数据的时候
-						this.getData() //调用函数加载数据			
-					} else {
-						uni.showToast({
-							title: '没有更多数据了！',
-							icon: 'none'
-						})
-					}
-				}
+				// if (this.videoData.length == current + 1) {
+				// 	//当还有1个视频没有看的时候开始加载数据
+				// 	if (this.hasMore) {
+				// 		//后台还有更多数据的时候
+				// 		this.getPageData() //调用函数加载数据			
+				// 	} else {
+				// 		uni.showToast({
+				// 			title: '没有更多数据了！',
+				// 			icon: 'none'
+				// 		})
+				// 	}
+				// }
 
 				this.setPlayIndex()	
 			},
@@ -157,7 +255,7 @@
 					this.videoData = []
 					this.currentVideo = 0
 				}else{
-					this.getData()
+					this.getPageData()
 				}
 			},
 			// swiper-item左右移动，通知tabs的滑块跟随移动
@@ -180,7 +278,7 @@
 					this.currentVideo = 0
 				}
 				if(e.detail.current == 0){
-					this.getData()
+					this.getPageData()
 				}
 				
 			},
@@ -199,8 +297,28 @@
 				})
 				console.log()
 			},
-			handleClick(type){
+			handleClick(type,item){
 				console.log('type',type)
+				this.info = item
+				if(type == 'check'){
+					this.showDetail = true
+					
+					console.log('item',item)
+				}else if(type == 'get'){
+					this.showModal  = true
+					console.log('item',item)
+				}else{
+					this.merchantPop = true
+				}
+			},
+			close(){
+				this.showDetail = false
+			},
+			open(){
+
+			},
+			closeGoods(){
+				this.showModal = false
 			}
 		}
 	}
@@ -209,6 +327,8 @@
 <style lang='scss' scoped>
 .merchant{
 	height: 100%;
+	position: absolute;
+	width: 100%;
 	display: flex;
 	flex-direction: column;
 	.z-pagging{
@@ -217,11 +337,30 @@
 			height: calc(100% - 150rpx);
 			.swiper-item{
 				position: relative;
-				video{
+				.content{
 					height: 100%;
 					width: 100%
 				}
+				.my-video{
+					height: 100%;
+					width: 100%;
+					video{
+						height: 100%;
+						width: 100%;
+						position: absolute;
+						top:0;
+						left: 0;
+						z-index: -1!important;
+						.my-view{
+							height: 100%;
+							width: 100%;
+							color: #FFF;
+						}
+					}
+				}
+				
 				.right-bar{
+					z-index: 100;
 					position: absolute;
 					border-radius: 50rpx 0 0 50rpx;
 					top: 0;
@@ -232,33 +371,55 @@
 					background: #000000;
 					text-shadow: 0rpx 6rpx 12rpx 0rpx rgba(0,0,0,0.15); 
 				}
-				image{
-					width: 76rpx;
-					height: 76rpx;
+				
+				.user{
+					z-index: 100;
+					top: 452rpx;
 					position: absolute;
 					right: 16rpx;
-				}
-				.user{
-					top: 452rpx;
-				}
-				.collect{
-					width: 76rpx;
-					height: 76rpx;
-					top: 584rpx;
+					color: #FFF;
+					image{
+						width: 76rpx;
+						height: 76rpx;
+					}
+					.text{
+						font-size: 20rpx;
+					}
 				}
 				.check{
-					width: 76rpx;
-					height: 76rpx;
+					z-index: 100;
 					top: 584rpx;
+					right: 16rpx;
+					position: absolute;
+					color: #FFF;
+					image{
+						width: 76rpx;
+						height: 76rpx;
+					}
+					.text{
+						font-size: 20rpx;
+					}
 				}
 				.get{
-					width: 76rpx;
-					height: 76rpx;
-					top: 706rpx;
+					z-index: 100;
+					top: 715rpx;
+					right: 16rpx;
+					position: absolute;
+					color: #FFF;
+					image{
+						width: 76rpx;
+						height: 76rpx;
+					}
+					.text{
+						font-size: 20rpx;
+					}
 				}
 			}
 		}
 	}
+}
+.popup-content{
+	color: red;
 }
 	
 </style>

@@ -44,7 +44,7 @@
         computed:{
 			...mapState(['userInfo']),
 			tabList:function(){
-				return this.userInfo.identity_type == 1 ? [
+				return this.userInfo.identity_type == 2 ? [
 				{
 					name: '全部'
 				}, {

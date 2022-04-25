@@ -175,13 +175,15 @@ export default {
                     display: flex;
                     align-items: center;
                     font-size: 28rpx;
-                    width: 200rpx;
+                    width: 160rpx;
                 }
                 .text{
                     display: flex;
                     align-items: center;
                     color: #8f9ca2;
                     flex: 1;
+                    font-size: 26rpx;
+                    word-break: break-all;
                 }
             }
         }
@@ -197,12 +199,15 @@ export default {
         display: flex;
         align-items: center;
         font-size: 28rpx;
-        width: 200rpx;
+        width: 160rpx;
     }
     .text{
         display: flex;
         align-items: center;
         color: #8f9ca2;
+        flex: 1;
+        font-size: 26rpx;
+        word-break: break-all;
     }
 }
 </style>

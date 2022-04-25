@@ -5,18 +5,37 @@
 		<!--  :enable-back-to-top="currentIndex===tabIndex" 在微信小程序上可以多加这一句，因为默认是允许点击返回顶部的，但是这个页面有多个scroll-view，会全部返回顶部，所以需要控制是当前index才允许点击返回顶部 -->
 		<z-paging ref="paging" v-model="dataList" @query="queryList" :fixed="false" :auto="false">
 			<!-- 如果希望其他view跟着页面滚动，可以放在z-paging标签内 -->
-			<view class="item" v-for="(item,index) in dataList" :key="index" @click="itemClick(item)">
-				<uniCard class="card">
+			<view class="item" v-for="(item,index) in dataList" :key="index">
+				<uniCard class="card" :title='`合作编号：${item.id}`' :extra="`快递单号：${item.sample_courier_number}`">
 					<view class="info">
-						<image :src="item.img" />
+						<image :src="item.pic_path" />
 						<view class="goods-info">
-							商品信息
+							<view class="title">{{item.goods_name}}</view>
+							<view>
+								<text style="margin-right:20rpx">价格：{{item.live_price || '-'}}</text>
+								<text style="margin-right:20rpx">佣金：{{item.commission_rate || '-'}}%</text>
+							</view>
+							<text>DSR评分：{{item.drs || '-'}}%</text>
+							<view>直播活动机制：{{item.preferential_way || '-'}}</view>
 						</view>
 					</view>
 					<view class="operator">
-						<button>发送反馈</button>
+						<button class="nopass" @click="handle('nopass',item)">未通过</button>
+						<button class="pass" @click="handle('pass',item)">通过</button>
 					</view>
 				</uniCard>
+				<u-popup
+					:show="showModal"
+					:round="10"
+					@close="showModal = false" 
+					@open="open"
+					mode="center"
+					:closeable='true'
+					:closeOnClickOverlay="true"
+					:customStyle="{width:'80%'}"
+				>
+					<NoPassInfo :info="info" @refresh="refresh"></NoPassInfo>
+				</u-popup>
 			</view>
 		</z-paging>
 	</view>
@@ -24,16 +43,21 @@
 
 <script>
 import {getGoodsInfo} from '../../service/apis/index'
+import NoPassInfo from './noPassInfo.vue'
+import {getData,testSample} from '../../service/apis/merchant'
 import uniCard from '../../uni_modules/uni-card/components/uni-card/uni-card.vue'
 	export default {
 		components:{
-			uniCard
+			uniCard,
+			NoPassInfo
 		},
 		data() {
 			return {
 				//v-model绑定的这个变量不要在分页请求结束中自己赋值！！！
 				dataList: [],
-				firstLoaded: false
+				firstLoaded: false,
+				showModal:false,
+				info:{}
 			}
 		},
 		props:{
@@ -72,60 +96,15 @@ import uniCard from '../../uni_modules/uni-card/components/uni-card/uni-card.vue
 				//组件加载时会自动触发此方法，因此默认页面加载时会自动触发，无需手动调用
 				//这里的pageNo和pageSize会自动计算好，直接传给服务器即可
 				//模拟请求服务器获取分页数据，请替换成自己的网络请求
-				const params = {
-					pageNo: pageNo,
-					pageSize: pageSize,
-					type: this.tabIndex + 1
-				}
-				const data= [
-						{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},
-						{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},
-						{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},
-						{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},
-						{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						},{
-							title:'title',
-							detail:'detail',
-							img:'https://7072-prod-2gzji75nedc130f1-1310542026.tcb.qcloud.la/%E6%88%91%E7%9A%84-%E6%9C%AA%E9%80%89%E6%8B%A9.png?sign=cd360b9170fd00036a2e86bb5bf705c6&t=1649685390'
-						}
-					]
-				let res= await getGoodsInfo()
-				this.$refs.paging.complete(data);
+				let res= await getData({
+					status:3,
+					page_number:pageNo,
+					count:pageSize
+				})
+
+				console.log('等你反馈',res)
+
+				this.$refs.paging.complete(res.data);
 				this.firstLoaded = true;
 				// getData().then(res => {
 				// 	//将请求的结果数组传递给z-paging
@@ -143,6 +122,28 @@ import uniCard from '../../uni_modules/uni-card/components/uni-card/uni-card.vue
 			},
 			itemClick(item) {
 				console.log('点击了', item.title);
+			},
+			async handle(type,item){
+				if(type == 'pass'){
+					let res = await testSample({
+						cooperation_id: item.id,
+						test_result: 1,
+					})
+					if (res.code == 200) {
+						uni.showToast({
+							title: res.msg,
+							icon: "none",
+						});
+						this.queryList(1,10)
+					}
+				}else{
+					this.info = item
+					this.showModal = true
+				}
+			},
+			open(){},
+			refresh(){
+				this.queryList(1,10)
 			}
 		}
 	}
@@ -159,7 +160,7 @@ import uniCard from '../../uni_modules/uni-card/components/uni-card/uni-card.vue
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		:first-child{
+		&:first-child{
 			margin-top: 16rpx;
 		}
 		.card{
@@ -172,6 +173,20 @@ import uniCard from '../../uni_modules/uni-card/components/uni-card/uni-card.vue
 				}
 				.goods-info{
 					margin-left: 16rpx;
+					flex: 1;
+					.title{
+						display: block;
+						overflow:hidden; //超出的文本隐藏
+						text-overflow:ellipsis; //溢出用省略号显示
+						white-space:nowrap; //溢出不换行
+						font-weight: bold;
+					}
+                    .info{
+                        display: flex;
+                        .label{
+                            
+                        }
+                    }
 				}
 			}
 			.operator{
@@ -187,6 +202,13 @@ import uniCard from '../../uni_modules/uni-card/components/uni-card/uni-card.vue
 					font-weight: Bold;
 					color: #333333;
 					display: inline-block;
+				}
+				.pass{
+					color: #19be6b;
+				}
+				.nopass{
+					color: #fa3534;
+					margin-right: 20rpx;
 				}
 			}
 		}

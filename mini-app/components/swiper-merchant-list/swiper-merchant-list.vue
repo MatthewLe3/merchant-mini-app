@@ -13,41 +13,60 @@
 		>
 			<!-- 如果希望其他view跟着页面滚动，可以放在z-paging标签内 -->
             <template v-if="currentIndex == 0">
-                <view class="item" v-for="(item,index) in dataList" :key="index" @click="itemClick(item)">
-                    <uniCard class="card">
+                <view class="item" v-for="(item,index) in dataList" :key="index">
+                    <uniCard class="card" :title="`合作编号：${item.id}`">
+						<view class="anchorInfo">
+							<image :src="item.anchor_data.icon" v-if="item.pic_path" />
+							<text>{{item.anchor_data.real_name || '-'}}</text>
+						</view>
                         <view class="info">
-                            <image :src="item.img" />
+                            <image :src="item.pic_path" />
                             <view class="goods-info">
-                                商品信息
+                                <view class="title">{{item.goods_name}}</view>
+								<view>
+									<text style="margin-right:20rpx">价格：{{item.live_price}}</text>
+									<text>佣金：{{item.commission_rate}}%</text>
+								</view>
+								<view>直播活动机制：{{item.preferential_way}}</view>
+								<view>主播留言：{{'-'}}</view>
                             </view>
                         </view>
                         <view class="operator">
-                            <button>给主播寄样品</button>
+                            <button @click="itemClick(item)">给主播寄样品</button>
                         </view>
                     </uniCard>
+					<u-popup
+						:show="showModal"
+						:round="10"
+						@close="showModal = false" 
+						@open="open"
+						mode="center"
+						:closeable='true'
+						:closeOnClickOverlay="true"
+						:customStyle="{width:'80%'}"
+					>
+						<GoodsInfo :info="currentInfo" @refresh="refresh"></GoodsInfo>
+					</u-popup>
                 </view>
             </template>
 			<template v-else>
-                <view class="item" v-for="(item,index) in dataList" :key="index" @click="itemClick(item)">
-                    <uniCard class="card" :title="`合作编号：${item.no}`" :extra="item.status | handleStatus">
+                <view class="item" v-for="(item,index) in dataList" :key="index" >
+                    <uniCard class="card" :title="`合作编号：${item.id}`" :extra="item.test_result | handleResult" :extraType="Number(item.test_result)">
+						<view class="anchorInfo">
+							<image :src="item.anchor_data.icon" v-if="item.pic_path" />
+							<text>{{item.anchor_data.real_name || '-'}}</text>
+						</view>
                         <view class="info">
+                            <image :src="item.pic_path" />
                             <view class="goods-info">
-                                <view class="info">
-                                    <view class="label">商品名称:</view>
-                                    <view class="info-content">asdda</view>
-                                </view>
-                                <view class="info">
-                                    <view class="label">反馈来源:</view>
-                                    <view class="info-content">asdda</view>
-                                </view>
-                                <view class="info">
-                                    <view class="label">试样反馈:</view>
-                                    <view class="info-content">asdda</view>
-                                </view>
+                                <view class="title">{{item.goods_name}}</view>
+								<view>
+									<text style="margin-right:20rpx">价格：{{item.live_price}}</text>
+									<text>佣金：{{item.commission_rate}}%</text>
+								</view>
+								<view>直播活动机制：{{item.preferential_way}}</view>
+								<view v-if="item.test_result == 2">主播反馈：{{item.test_comment || '-'}}</view>
                             </view>
-                        </view>
-                        <view class="operator" v-if="item.status == 1">
-                            <button>联系主播</button>
                         </view>
                     </uniCard>
                 </view>
@@ -59,10 +78,14 @@
 <script>
 import {getGoodsInfo} from '../../service/apis/index'
 import {getData,test2} from '../../service/apis/merchant'
+import GoodsInfo from './goodsInfo.vue'
 import uniCard from '../../uni_modules/uni-card/components/uni-card/uni-card.vue'
+import UPopup from '../../uni_modules/uview-ui/components/u-popup/u-popup.vue'
 	export default {
 		components:{
-			uniCard
+			uniCard,
+			UPopup,
+			GoodsInfo
 		},
 		data() {
 			return {
@@ -71,7 +94,9 @@ import uniCard from '../../uni_modules/uni-card/components/uni-card/uni-card.vue
 				firstLoaded: false,
 
                 resultList:[],
-                resultFirstLoaded:false
+                resultFirstLoaded:false,
+				showModal:false,
+				currentInfo:{}
 			}
 		},
 		props:{
@@ -106,11 +131,29 @@ import uniCard from '../../uni_modules/uni-card/components/uni-card/uni-card.vue
 			},
 		},
         filters:{
-            handleStatus(status){
-                return status == 1 ? "试样通过" : "试样未通过"
+            handleResult(status){
+				let text = ''
+				switch (status) {
+					case 0:
+						text = '未试样'
+						break;
+					case 1:
+						text = '试样通过'
+						break;
+					case 2:
+						text = '试样未通过'
+						break;
+				
+					default:
+						break;
+				}
+                return text
             }
         },
 		methods: {
+			refresh(){
+				this.queryList(1,10)
+			},
 			async queryList(pageNo, pageSize) {
 				console.log('vvvvvvvvvvv',pageNo,pageSize)
 				//组件加载时会自动触发此方法，因此默认页面加载时会自动触发，无需手动调用
@@ -142,20 +185,20 @@ import uniCard from '../../uni_modules/uni-card/components/uni-card/uni-card.vue
                 if(this.currentIndex == 0){
 					let res = await getData({
 						status:2,
-						pageNo,
-						pageSize,
+						page_number:pageNo,
+						count:pageSize,
 					})
-					console.log('111',res)
+					console.log('给主播发样品',res)
                     this.$refs.paging.complete(res.data || []);
                     this.firstLoaded = true;
                 }else{
 					let res = await getData({
 						status:4,
-						pageNo,
-						pageSize,
+						page_number:pageNo,
+						count:pageSize,
 					})
-					console.log('222',res)
-                    this.$refs.paging.complete(res.data);
+					console.log('试样结果',res)
+                    this.$refs.paging.complete(res.data || []);
                     this.resultFirstLoaded = true;
                 }
 				
@@ -175,6 +218,11 @@ import uniCard from '../../uni_modules/uni-card/components/uni-card/uni-card.vue
 			},
 			itemClick(item) {
 				console.log('点击了', item.title);
+				this.showModal = true
+				this.currentInfo = item
+			},
+			open(){
+
 			}
 		}
 	}
@@ -193,9 +241,24 @@ import uniCard from '../../uni_modules/uni-card/components/uni-card/uni-card.vue
 		justify-content: space-between;
 		uni-card:first-child{
 			margin-top: 16rpx;
+
 		}
 		.card{
 			width: 100%;
+			.anchorInfo{
+				display: flex;
+				margin-bottom: 20rpx;
+				image{
+					height: 50rpx;
+					width: 50rpx;
+					border-radius: 50%;
+					margin-right: 20rpx;
+				}
+				text{
+					display: flex;
+					align-items: center;
+				}
+			}
 			.info{
 				display: flex;
 				image{
@@ -204,6 +267,14 @@ import uniCard from '../../uni_modules/uni-card/components/uni-card/uni-card.vue
 				}
 				.goods-info{
 					margin-left: 16rpx;
+					flex: 1;
+					.title{
+						display: block;
+						overflow:hidden; //超出的文本隐藏
+						text-overflow:ellipsis; //溢出用省略号显示
+						white-space:nowrap; //溢出不换行
+						font-weight: bold;
+					}
                     .info{
                         display: flex;
                         .label{

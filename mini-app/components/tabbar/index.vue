@@ -8,14 +8,25 @@
 						:src="selectedPage ? selectedHomeIcon : homeIcon"
 					)
 				.text 商品展示
-		.tab.specital(@click="operator")
+		.tab.specital()
 			.tab-content
 				.my-icon
-					.icon-content
+					.icon-content(
+						@click="operator"
+						v-if='userInfo.identity_type === 2'
+					)
 						image.specital(
-							:src="userInfo.identity_type === 1 ? editIcon : friendIcon"
+							:src="editIcon"
 						)
-				.text.des {{userInfo.identity_type === 1 ? '点击新增申报商品' : '点击邀请商家申报'}}
+					button.icon-content(
+						v-if='userInfo.identity_type != 2' 
+						style='padding:unset'
+						open-type="share"
+					)
+						image.specital(
+							:src="friendIcon"
+						)
+				.text.des {{userInfo.identity_type === 2 ? '点击新增申报商品' : '点击邀请商家申报'}}
 		.tab(@click="jumpUser")
 			.tab-content
 				.my-icon
@@ -58,7 +69,8 @@
 				
 				currentRoute:'',
 				show:false,
-				goodsModal:false
+				goodsModal:false,
+
 			}
 		},
 		computed:{
@@ -73,6 +85,8 @@
 			this.currentRoute = routes[routes.length -1].route
 			console.log('gg',this.currentRoute)
 		},
+		mounted(){
+		},
 		methods:{
 			...mapMutations({
 				setStoreArr:'setStoreArr'
@@ -80,7 +94,7 @@
 			jumpHome(){
 				// 跳转首页
 				uni.redirectTo({
-					url: `${this.userInfo.identity_type === 1 ? '/subconstract/merchantHome/index' : '/subconstract/actorHome/index'}`
+					url: `${this.userInfo.identity_type === 2 ? '/subconstract/merchantHome/index' : '/subconstract/actorHome/index'}`
 				})
 			},
 			jumpUser(){
@@ -91,29 +105,31 @@
 			},
 			async operator(){
 				// 操作按钮
-				if(this.userInfo.identity_type === 1){
+				if(this.userInfo.identity_type === 2){
 					// 新增商品
-					let res = await getStoreInfo({})
-					console.log('getStoreInfo',res)
-					const {code,data} = res
+					// let res = await getStoreInfo({})
+					// console.log('getStoreInfo',res)
+					// const {code,data} = res
+					uni.navigateTo({
+						url: '/subconstract/addPartner/index'
+					})
+					// if(code === 200){
+					// 	if(data.length){
+					// 		this.setStoreArr(data)
 
-					if(code === 200){
-						if(data.length){
-							this.setStoreArr(data)
-
-							uni.navigateTo({
-								url: '/subconstract/addPartner/index'
-							})
-						}else{
-							this.show = true
-						}
-					}else{
-						uni.showToast({
-							title: '获取商铺信息失败',
-							icon:code === 200 ? 'success' : 'error',
-							duration: 1500
-						});
-					}
+					// 		uni.navigateTo({
+					// 			url: '/subconstract/addPartner/index'
+					// 		})
+					// 	}else{
+					// 		this.show = true
+					// 	}
+					// }else{
+					// 	uni.showToast({
+					// 		title: '获取商铺信息失败',
+					// 		icon:code === 200 ? 'success' : 'error',
+					// 		duration: 1500
+					// 	});
+					// }
 				}
 			},
 			handleConfirm(){
@@ -174,8 +190,11 @@
 				}
 				.des{
 					font-size: 28rpx;
-					position: relative;
-					padding-top: 48rpx;
+					position: absolute;
+					top: 28px;
+					left: 50%;
+					width: 100%;
+					transform: translate(-50%, 0);
 				}
 			}
 		}

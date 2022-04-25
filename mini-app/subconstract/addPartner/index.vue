@@ -54,7 +54,7 @@
             v-show='active === 6'
         )
             Preview(
-                :info="this.info"
+                :info="info"
             )
         
         button.first-btn(
@@ -76,10 +76,11 @@
 
         u-modal(
             :show="showShare" 
-            :title="'转发给主播'" 
-            :showConfirmButton="false"
+            :title="'申请合作'" 
+            :showConfirmButton="true"
             :showCancelButton="true"
             @cancel="showShare=false"
+            @confirm="confirm"
         )
             .modal-content(slot="default")
                 //- u-icon(
@@ -88,6 +89,18 @@
                 //-     size="40"
                 //-     name="server-man"
                 //- )
+                u-checkbox-group(
+                    v-model="selectedAnchor"
+                    iconPlacement="right" 
+                    placement="column"
+                )
+                    u-checkbox(
+                        :customStyle="{marginBottom: '8px'}"
+                        v-for="(item, index) in anchorList"
+                        :key="index"
+                        :label="item.name"
+                        :name="item.id"
+                    )
                 u-button(
                     open-type="share"
                     icon="server-man" 
@@ -108,7 +121,7 @@
 <script>
 // import MyForm from '../../components/myForm/index.vue'
 import {addGoods,updateGoods} from '../../service/apis/index'
-import {getStoreGoodsInfo,newCooperation} from '../../service/apis/merchant'
+import {getStoreGoodsInfo,newCooperation,sendApply,updateCooperationInfo} from '../../service/apis/merchant'
 import FirstForm from './components/firstForm/index.vue'
 import SecondForm from './components/secondForm/index.vue'
 import ThirdForm from './components/thirdForm/index.vue'
@@ -147,20 +160,27 @@ export default {
             showShare:false,
             showContinue:false,
             
-            goods_id:0
+            goods_id:0,
+            anchorList:[
+                // {
+                //     id:'oJ92T5V3wWVuP55sPZytRYjGulf8',
+                //     name:'测试账号'
+                // }
+            ],
+            selectedAnchor:[]
         };
     },
     computed:{
         ...mapState(['shareStatus']),
-        share:function(){
-            return {
-                title:'商品详情',
-                path:`/pages/login/index?goods_id=${this.goods_id}`,
-                imageUrl:'',
-                desc:'我上架了一款商品，快来合作吧。',
-                content:'我上架了一款商品，快来合作吧。'
-            }
-        }
+        // share:function(){
+        //     return {
+        //         title:'商品详情',
+        //         path:`/pages/login/index?cooperation_id=${this.info.cooperation_id}`,
+        //         imageUrl:'',
+        //         desc:'我上架了一款商品，快来合作吧。',
+        //         content:'我上架了一款商品，快来合作吧。'
+        //     }
+        // }
     },
     watch:{
         shareStatus:function(newVal){
@@ -186,13 +206,28 @@ export default {
                 this.continue()
             }
         },100)
+
+        let routes = getCurrentPages()
+		let curPage = routes[routes.length -1]
+        const {openid,name,nickName} = curPage.options
+        if(openid){
+            this.anchorList.push({
+                id:openid,
+                name,
+                nickName
+            })
+        }
+
     },
     methods:{
         ...mapMutations({
             setShareStatus:"setShareStatus"
         }),
         back(){
-            uni.navigateBack({})
+            // uni.navigateBack({})
+            uni.redirectTo({
+                url: `/subconstract/merchantHome/index`
+            })
         },
         async nextStep(current){
             switch (current) {
@@ -268,22 +303,44 @@ export default {
                     }
 
                     let res = obj.goods_id ? await updateGoods(obj) : await addGoods(obj)
-                    this.goods_id = obj.goods_id || 200
-                    if(res.code  == 200){
-                        this.active += 1
-                        uni.showToast({
-                            title: '提交成功',
-                            icon:'success',
-                            duration: 1500
-                        });
+                    this.goods_id = obj.goods_id || res.data.goods_id
+                    this.info = Object.assign({},obj,{
+                        goods_id:this.goods_id
+                    })
+                    delete this.info.id
+
+                    // 提交合作单
+                    let result
+                    if(this.info.cooperation_id){
+                        result = await updateCooperationInfo(this.info)
+                        console.log('修改',result)
                     }else{
-                        this.active += 1
-                        uni.showToast({
-                            title: '提交失败',
-                            icon:'error',
-                            duration: 1500
-                        });
+                        result = await newCooperation(this.info)
+                        console.log('新建',result)
                     }
+                    
+
+
+                    if(result.code  == 200){
+                        this.active += 1
+                        this.info = Object.assign({},obj,{
+                            cooperation_id:result.data.cooperation_id
+                        })
+
+
+                        this.share = Object.assign({},{
+                            title:'商品详情',
+                            path:`/pages/login/index?cooperation_id=${this.info.cooperation_id}`,
+                            imageUrl:'',
+                            desc:'我上架了一款商品，快来合作吧。',
+                            content:'我上架了一款商品，快来合作吧。'
+                        })
+                    }
+                    uni.showToast({
+                        title: result.msg,
+                        icon:'none',
+                        duration: 1500
+                    });
 
                     break;
             
@@ -294,10 +351,6 @@ export default {
         updateGoodsInfo(value){
             this.goodsInfo = value
         },
-        // share(){
-        //     console.log('发送给主播')
-        //     this.showShare = true
-        // },
         handleConfirm(){
             this.showContinue = false
             this.active = 0
@@ -308,27 +361,46 @@ export default {
             this.showShare = false
             this.showContinue = true
         },
-        onShareAppMessage(res) {
-            this.setShareStatus(true)
-            return {
-                title:this.share.title,
-                path:this.share.path,
-                imageUrl:this.share.imageUrl,
-                desc:this.share.desc,
-                content:this.share.content,
-                success(res){
-                    uni.showToast({
-                        title:'分享成功'
-                    })
-                },
-                fail(res){
-                    uni.showToast({
-                        title:'分享失败',
-                        icon:'none'
-                    })
-                }
+        // onShareAppMessage(res) {
+        //     this.setShareStatus(true)
+        //     return {
+        //         title:this.share.title,
+        //         path:this.share.path,
+        //         imageUrl:this.share.imageUrl,
+        //         desc:this.share.desc,
+        //         content:this.share.content,
+        //         success(res){
+        //             uni.showToast({
+        //                 title:'分享成功'
+        //             })
+        //         },
+        //         fail(res){
+        //             uni.showToast({
+        //                 title:'分享失败',
+        //                 icon:'none'
+        //             })
+        //         }
+        //     }
+        // },
+        async confirm(){
+            console.log('config',this.selectedAnchor)
+            if(this.selectedAnchor.length){
+                let res = await sendApply({
+                    anchor_openid:this.selectedAnchor[0],
+                    cooperation_id:this.info.cooperation_id
+                })
+                console.log('sendApply',res)
+                uni.showToast({
+                    title:res.msg,
+                    icon:'none'
+                })
+            }else{
+                uni.showToast({
+                    title:'请选择主播',
+                    icon:'none'
+                })
             }
-    }
+        }
     }
 };
 </script>
@@ -410,6 +482,6 @@ export default {
     }
 }
 .modal-content{
-    margin:0 auto;
+    // margin:0 auto;
 }
 </style>

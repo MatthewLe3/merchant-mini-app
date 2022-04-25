@@ -24,6 +24,54 @@ export const newCooperation = async (data) => {
     return res
 }
 
+export const updateCooperationInfo = async (data) => {
+    let res = await service({
+		url:'/cooperation_manage/update_cooperation_info/',
+		data
+	})
+    return res
+}
+
+export const getCooperatioInfoById = async (data) => {
+    let res = await service({
+		url:'/cooperation_manage/get_cooperation_info_by_id/',
+		data
+	})
+    return res
+}
+
+export const sendApply = async (data) => {
+    let res = await service({
+		url:'/cooperation_manage/send_apply/',
+		data
+	})
+    return res
+}
+
+export const sendSample = async (data) => {
+    let res = await service({
+		url:'/cooperation_manage/send_sample/',
+		data
+	})
+    return res
+}
+
+export const applyForSample = async (data) => {
+    let res = await service({
+		url:'/cooperation_manage/apply_for_sample/',
+		data
+	})
+    return res
+}
+export const testSample = async (data) => {
+    let res = await service({
+		url:'/cooperation_manage/test_sample/',
+		data
+	})
+    return res
+}
+
+
 
 export const test2 = async () =>{
 	let res = await new Promise((reslove,reject)=>{

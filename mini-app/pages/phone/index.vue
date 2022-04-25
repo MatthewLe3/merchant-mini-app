@@ -37,7 +37,8 @@ export default {
         }),
         async finish(){
             let res = await updateUserInfo({
-                phone_number:this.phone
+                phone_number:this.phone,
+                // identity_type:this.userInfo.identity_type ===1 ? 2:1
             })
             const {code,msg} = res
             uni.showToast({

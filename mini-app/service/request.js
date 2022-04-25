@@ -9,21 +9,29 @@ export const service = async ({
 	uni.showLoading({
 		title: '加载中'
 	});
-	let res = await wx.cloud.callContainer({
-		config:{
-			env:ENV
-		},
-		path:url,
-		header:{
-			"X-WX-SERVICE": X_WX_SERVICE,
-        	"content-type": dataType
-		},
-		method,
-		data
-	})
+	try {
+		let res = await wx.cloud.callContainer({
+			config:{
+				env:ENV
+			},
+			path:url,
+			header:{
+				"X-WX-SERVICE": X_WX_SERVICE,
+				"content-type": dataType
+			},
+			method,
+			data
+		})
+		uni.hideLoading();
+		return res.data
+	} catch (error) {
+		uni.hideLoading();
+		// return {}
+	}
+	
 
-	uni.hideLoading();
-	return res.data
+	
+	
 }
 
 

@@ -241,6 +241,12 @@ export default {
                     message: '请上传商品图片',
                     trigger: ['blur', 'change']
                 },
+                'live_recording_screen_path': {
+                    type: 'array',
+                    required: true,
+                    message: '请上传其他主播视频',
+                    trigger: ['blur', 'change']
+                },
             },
         };
     },
